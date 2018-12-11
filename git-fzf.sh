@@ -64,6 +64,6 @@ case $subcommand in
     #read colected options into an array
     mapfile -t OPTIONS <&${CAT[0]}
 
-    echo "Available options are: [ ${OPTIONS[@]} ]"
+    echo "Available options are: [ ${OPTIONS[@]} ]" >> /dev/stderr
     ;;
 esac
