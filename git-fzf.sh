@@ -7,7 +7,7 @@ STRIP_STATUS_PORCELAIN='cut -c 4-'
 STRIP_BRANCH='cut -c 3-'
 
 PREVIEWCOMMIT="echo \"{}\" | $STRIP_REFLOG | xargs git show --color=always"
-PREVIEWCHANGE="echo {} | $STRIP_STATUS_PORCELAIN | xargs git diff --color=always"
+PREVIEWCHANGE="echo {} | $STRIP_STATUS_PORCELAIN | xargs git diff --color=always --"
 PREVIEWBRANCH="echo {} | $STRIP_BRANCH | xargs git log -n 1000 --color=always"
 LOG_FORMAT="format:%C(auto,yellow)%h %C(auto,blue)%>(12)%ad %C(auto,green)%<(18) %aN%C(auto,reset)%s%C(auto,red)% gD% D"
 
