@@ -28,25 +28,42 @@ then
   exit 1
 fi
 
+# https://stackoverflow.com/a/50371710/2872678
+# create coprocess with 2 descriptors so we can read and write to them
+coproc CAT { cat ; }
+
+# creme de la creme of this solution - use function to both collect and select elements
+function option {
+    echo "$1" >&${CAT[1]}
+    echo "$1"
+}
+
 
 subcommand=$1
 shift
 temp=$(mktemp)
 case $subcommand in
-  "reflog"|"log")
+  $(option reflog)|$(option log))
     gitLogLike $subcommand $@ | fzfCommit | eval $STRIP_REFLOG
     ;;
-  "add")
+  $(option add))
     git status --porcelain > $temp
     [ -s $temp ] || errorWith "No unstaged changes, nothing to add"
     cat $temp | fzf --multi --preview="$PREVIEWCHANGE" | eval "$STRIP_STATUS_PORCELAIN" | xargs -- git $subcommand --
     ;;
-  "reset")
+  $(option reset))
     git diff --name-only --cached > $temp
     [ -s $temp ] || errorWith "No changes staged, nothing to reset"
     cat $temp | fzf --multi --preview="git diff --color=always {}" | xargs git $subcommand --
     ;;
   *)
-    errorWith "Unknown command '$subcommand'"
+    echo "Unknown command '$subcommand'" >> /dev/stderr
+
+    # close writing descriptor
+    exec {CAT[1]}>&-
+    #read colected options into an array
+    mapfile -t OPTIONS <&${CAT[0]}
+
+    echo "Available options are: [ ${OPTIONS[@]} ]"
     ;;
 esac
