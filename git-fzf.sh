@@ -65,5 +65,7 @@ case $subcommand in
     mapfile -t OPTIONS <&${CAT[0]}
 
     echo "Available options are: [ ${OPTIONS[@]} ]" >> /dev/stderr
+
+    exit 1
     ;;
 esac
