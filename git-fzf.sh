@@ -46,7 +46,7 @@ case $subcommand in
   $(option reflog)|$(option log))
     gitLogLike $subcommand $@ | fzfCommit | eval $STRIP_REFLOG
     ;;
-  $(option add))
+  $(option add)|$(option checkout))
     git status --porcelain > $temp
     [ -s $temp ] || errorWith "No unstaged changes, nothing to add"
     cat $temp | fzf --multi --preview="$PREVIEWCHANGE" | eval "$STRIP_STATUS_PORCELAIN" | xargs -- git $subcommand --
