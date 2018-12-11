@@ -8,6 +8,12 @@ LOG_FORMAT="format:%C(auto,yellow)%h %C(auto,blue)%>(12)%ad %C(auto,green)%<(18)
 
 function fzfCommit { fzf --ansi --preview="$PREVIEWCOMMIT" --tiebreak=index; }
 
+function gitLogLike {
+  subcommand=$1
+  shift
+  git $subcommand --color=always --format="$LOG_FORMAT" --date=relative $@
+}
+
 if [ $# -lt 1 ];
 then
   echo "No subcommand specified!" > /dev/stderr
@@ -18,11 +24,8 @@ fi
 subcommand=$1
 shift
 case $subcommand in
-  "reflog")
-    git reflog --color=always --format="$LOG_FORMAT" --date=relative $@ | fzfCommit | eval $STRIP_REFLOG
-    ;;
-  "log")
-    git log --color=always --format="$LOG_FORMAT" --date=relative $@ | fzfCommit | eval $STRIP_REFLOG
+  "reflog"|"log")
+    gitLogLike $subcommand $@ | fzfCommit | eval $STRIP_REFLOG
     ;;
   *)
     echo "Unknown command '$subcommand'" > /dev/stderr
