@@ -4,9 +4,11 @@ set -euo pipefail
 
 STRIP_REFLOG='grep "[0-9a-f]+" --perl-regexp --only-matching | head -n 1 | xargs git rev-parse'
 STRIP_STATUS_PORCELAIN='cut -c 4-'
+STRIP_BRANCH='cut -c 3-'
 
 PREVIEWCOMMIT="echo \"{}\" | $STRIP_REFLOG | xargs git show --color=always"
 PREVIEWCHANGE="echo {} | $STRIP_STATUS_PORCELAIN | xargs git diff --color=always"
+PREVIEWBRANCH="echo {} | $STRIP_BRANCH | xargs git log -n 1000 --color=always"
 LOG_FORMAT="format:%C(auto,yellow)%h %C(auto,blue)%>(12)%ad %C(auto,green)%<(18) %aN%C(auto,reset)%s%C(auto,red)% gD% D"
 
 function fzfCommit { fzf --ansi --preview="$PREVIEWCOMMIT" --tiebreak=index; }
@@ -51,6 +53,9 @@ temp=$(mktemp)
 case $subcommand in
   $(option reflog)|$(option log))
     gitLogLike $subcommand $@ | fzfCommit | eval $STRIP_REFLOG
+    ;;
+  $(option branch))
+    git branch --color=always $@ | fzf --ansi --preview="$PREVIEWBRANCH" | $STRIP_BRANCH
     ;;
   $(option add)|$(option checkout))
     git status --porcelain > $temp
