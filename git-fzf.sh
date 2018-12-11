@@ -57,6 +57,9 @@ case $subcommand in
   $(option branch))
     git branch --color=always $@ | fzf --ansi --preview="$PREVIEWBRANCH" | $STRIP_BRANCH
     ;;
+  $(option remote))
+    git remote $@ | fzf --ansi --preview="git remote show -n {}"
+    ;;
   $(option add)|$(option checkout))
     git status --porcelain > $temp
     [ -s $temp ] || errorWith "No unstaged changes, nothing to add"
