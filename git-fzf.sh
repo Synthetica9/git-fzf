@@ -34,8 +34,8 @@ coproc CAT { cat ; }
 
 # creme de la creme of this solution - use function to both collect and select elements
 function option {
-    echo "$1" >&${CAT[1]}
-    echo "$1"
+  echo "$1" >&${CAT[1]}
+  echo "$1"
 }
 
 
