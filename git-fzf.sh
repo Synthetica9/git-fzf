@@ -22,11 +22,17 @@ function errorWith {
   exit 1
 }
 
+
 if [ $# -lt 1 ];
 then
-  echo "No subcommand specified!" > /dev/stderr
+  echo "No subcommand specified! See:"
+  echo
+  echo "    git fzf help"
   exit 1
-fi
+fi > /dev/stderr
+
+# Check we are actually in a git repo
+git rev-parse --is-inside-work-tree > /dev/null
 
 # https://stackoverflow.com/a/50371710/2872678
 # create coprocess with 2 descriptors so we can read and write to them
@@ -57,7 +63,10 @@ case $subcommand in
     cat $temp | fzf --multi --preview="git diff --color=always {}" | xargs git $subcommand --
     ;;
   *)
-    echo "Unknown command '$subcommand'" >> /dev/stderr
+    if [ "$subcommand" != "help" ];
+    then
+      echo "Unknown command '$subcommand'" >> /dev/stderr
+    fi
 
     # close writing descriptor
     exec {CAT[1]}>&-
