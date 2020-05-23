@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Check that the FZF binary exists:
+which fzf > /dev/null || (echo "fzf not found" && exit 1)
+
 STRIP_REFLOG='grep "[0-9a-f]+" --perl-regexp --only-matching | head -n 1 | xargs git rev-parse'
 STRIP_STATUS_PORCELAIN='cut -c 4-'
 STRIP_BRANCH='cut -c 3-'
