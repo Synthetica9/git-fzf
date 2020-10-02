@@ -73,6 +73,11 @@ case $subcommand in
     [ -s $temp ] || errorWith "No changes staged, nothing to reset"
     cat $temp | fzf --multi --preview="git diff --color=always {}" | xargs git $subcommand --
     ;;
+  $(option diff))
+    git diff --name-only > $temp
+    [ -s $temp ] || errorWith "No changes"
+    cat $temp | fzf --multi --preview="git diff --color=always {}"
+    ;;
   *)
     if [ "$subcommand" != "help" ];
     then
