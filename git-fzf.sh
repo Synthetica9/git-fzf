@@ -5,6 +5,10 @@ set -euo pipefail
 # Check that the FZF binary exists:
 which fzf > /dev/null || (echo "fzf not found" && exit 1)
 
+function colorize() {
+  bat --color=always -pp --file-name $1 || cat
+}
+
 STRIP_REFLOG='grep "[0-9a-f]+" --perl-regexp --only-matching | head -n 1 | xargs git rev-parse'
 STRIP_STATUS_PORCELAIN='cut -c 4-'
 STRIP_BRANCH='cut -c 3-'
@@ -14,7 +18,7 @@ PREVIEWCHANGE="echo {} | $STRIP_STATUS_PORCELAIN | xargs git diff --color=always
 PREVIEWBRANCH="echo {} | $STRIP_BRANCH | xargs git log -n 1000 --color=always"
 LOG_FORMAT="format:%C(auto,yellow)%h %C(auto,blue)%>(14)%ad %C(auto,green)%<(18) %aN%C(auto,reset)%s%C(auto,red)% gD% D"
 
-function fzfCommit { fzf --ansi --preview="$PREVIEWCOMMIT" --tiebreak=index; }
+function fzfCommit { fzf --ansi --preview="$PREVIEWCOMMIT" --tiebreak=index "$@"; }
 
 function gitLogLike {
   subcommand=$1
@@ -77,6 +81,14 @@ case $subcommand in
     git diff --name-only > $temp
     [ -s $temp ] || errorWith "No changes"
     cat $temp | fzf --multi --preview="git diff --color=always {}"
+    ;;
+  $(option blame))
+    FILE=$1
+    shift
+    REV=${1:-HEAD}
+    git blame -s --abbrev=8 --progress --color-lines -- "$FILE" "$REV" > $temp
+    BINDING="tab:execute:echo {} | $STRIP_REFLOG | (xargs git fzf blame $FILE)"
+    paste -d "   " <(cat $temp | cut -d ')' -f 1) <(git show "$REV:$FILE" | colorize "$FILE") | fzfCommit --layout=reverse-list --bind "$BINDING"
     ;;
   *)
     if [ "$subcommand" != "help" ];
